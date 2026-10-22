@@ -6,6 +6,8 @@ A Catppuccin terminal dashboard for Canvas grades and submissions. See your high
 
 Supports course nicknames, custom group/assessment weights, local assessments, best-N drop rules, what-if marks and offline snapshots. Changes stay local; Canvas access uses GET requests only.
 
+![Canvas Grades demo showing course grades, assessment statuses and grade targets using synthetic data](demo.png)
+
 ## Install and run
 
 Requires Python 3.11+. From a checkout, install with [uv](https://docs.astral.sh/uv/getting-started/installation/):
