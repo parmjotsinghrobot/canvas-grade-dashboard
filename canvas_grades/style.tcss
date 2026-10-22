@@ -1,0 +1,54 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+Screen { background: #1e1e2e; color: #cdd6f4; }
+Header { background: #181825; color: #f5c2e7; }
+Footer { background: #181825; }
+#main { padding: 0 1; }
+#masthead { height: 1; }
+#brand { color: #f5c2e7; text-style: bold; width: 1fr; }
+#connection { color: #a6e3a1; width: auto; }
+#sync { color: #a6adc8; height: 1; }
+#loading { height: 2; }
+#courses { height: 9; border: round #45475a; margin-bottom: 1; }
+DataTable { background: #1e1e2e; }
+DataTable > .datatable--header { background: #313244; color: #cdd6f4; text-style: bold; }
+DataTable > .datatable--cursor { background: #45475a; color: #f5c2e7; }
+DataTable:focus { border: round #f5c2e7; }
+#detail { height: 1fr; min-height: 12; }
+#work-panel { width: 3fr; padding-right: 1; }
+#course-title { height: auto; max-height: 2; color: #f5c2e7; text-style: bold; }
+#summary { height: auto; color: #a6adc8; }
+#assignments { height: 1fr; min-height: 5; border: round #45475a; }
+#assignment-detail { height: auto; min-height: 2; max-height: 4; color: #a6adc8; padding-top: 1; }
+#target-panel { width: 34; background: #181825; padding: 1 1; border: round #45475a; }
+.section-label { color: #f5c2e7; text-style: bold; height: 1; }
+.muted { color: #a6adc8; height: auto; margin-bottom: 1; }
+#targets { height: 13; }
+#warnings { height: auto; color: #f9e2af; padding-top: 1; }
+#assumptions { height: auto; max-height: 4; color: #a6adc8; margin-top: 1; }
+ModalScreen { align: center middle; background: #11111bcc; }
+#dialog { width: 76; height: auto; max-height: 95%; padding: 1 2; border: round #f5c2e7; background: #1e1e2e; }
+#picker-dialog { width: 90%; height: 80%; padding: 1 2; border: round #f5c2e7; background: #1e1e2e; }
+#help-dialog { width: 85%; height: 85%; padding: 1 2; border: round #f5c2e7; background: #1e1e2e; }
+.dialog-title { text-style: bold; color: #f5c2e7; height: 2; }
+.explanation { height: auto; color: #a6adc8; margin-bottom: 1; }
+Input { margin-bottom: 1; }
+.buttons { height: auto; margin-top: 1; }
+Button { margin-right: 1; }
+#setup-error, #picker-error, #whatif-error { color: #f38ba8; height: auto; }
+#course-options { height: 1fr; }
+#weights-dialog { width: 90%; max-width: 110; height: 85%; padding: 1 2; border: round #f5c2e7; background: #1e1e2e; }
+#weight-fields { height: 1fr; min-height: 4; border: round #45475a; padding: 0 1; }
+.weight-row { height: 4; }
+.weight-row Label { width: 1fr; padding-top: 1; }
+.weight-row Input { width: 15; }
+.weight-row .percent-label { width: 3; }
+#weight-total { height: 2; color: #a6e3a1; padding-top: 1; }
+#weight-error { height: auto; color: #f38ba8; }
+#weight-groups, #weight-assignments, #weight-canvas, #weight-cancel { width: 32; margin-bottom: 1; }
+#local-dialog { width: 84; max-width: 95%; height: 90%; padding: 1 2; border: round #f5c2e7; background: #1e1e2e; }
+#local-fields { height: 1fr; min-height: 5; }
+#local-points-row { height: 6; }
+#local-points-row > Vertical { width: 1fr; padding-right: 1; }
+#local-error { height: auto; color: #f38ba8; }
+#cookie-dialog { width: 84; max-width: 95%; height: auto; max-height: 95%; padding: 1 2; border: round #f5c2e7; background: #1e1e2e; }
+#cookie-error { height: auto; color: #f38ba8; }

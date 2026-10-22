@@ -1,0 +1,32 @@
+[project]
+name = "canvas-grades"
+version = "0.1.0"
+description = "A terminal dashboard for Canvas grades, submissions and attainable grade targets"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = ["textual==8.2.8", "platformdirs>=4,<5"]
+keywords = ["canvas", "grades", "tui", "textual"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Programming Language :: Python :: 3",
+    "Topic :: Education",
+]
+
+[project.scripts]
+canvas-grades = "canvas_grades.__main__:main"
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+exclude = [".local", ".venv", "__pycache__", "*.pyc", ".env", ".env.*", "canvas-grades-*.json", "credentials.json", "session.json", "snapshot.json", "config.json", "browser-setup.html"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["canvas_grades"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["canvas_grades", "tests", "scripts", "docs", "README.md", "OAUTH.md", "LICENSE", "pyproject.toml", "run", ".gitignore", ".github"]

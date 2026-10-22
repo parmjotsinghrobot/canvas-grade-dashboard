@@ -1,0 +1,17 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+set -eu
+cd "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if [ ! -x .venv/bin/python ]; then
+    if command -v uv >/dev/null 2>&1; then
+        uv venv .venv
+    else
+        python3 -m venv .venv
+    fi
+fi
+if command -v uv >/dev/null 2>&1; then
+    uv pip install --quiet --python .venv/bin/python -e .
+else
+    .venv/bin/python -m pip install --quiet -e .
+fi
+exec .venv/bin/python -m canvas_grades "$@"
