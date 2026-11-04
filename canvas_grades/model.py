@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Canvas Grades contributors
-"""Pure grade calculations. All percentages are percentage points (0..100)."""
+"""Pure grade calculations. What-if overrides use raw assessment marks."""
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -162,7 +162,7 @@ def project(course: dict, remaining: float = 100.0, *, strict: bool = False,
             points = float(a.get("points_possible") or 0)
             score = fixed_score(a)
             if a["id"] in overrides:
-                score = points * overrides[a["id"]] / 100
+                score = overrides[a["id"]]
             elif score is None:
                 score = 0 if strict and overdue(a) else points * remaining / 100
             if points == 0 and score:
@@ -205,20 +205,131 @@ def project(course: dict, remaining: float = 100.0, *, strict: bool = False,
 
 def required(course: dict, target: float, *, strict=False, overrides=None) -> float | None:
     """Uniform mark needed on all unmarked work; drop rules are recalculated."""
-    high = project(course, 100, strict=strict, overrides=overrides).percent
-    low = project(course, 0, strict=strict, overrides=overrides).percent
-    if high is None or high + 1e-8 < target:
-        return None
-    if low is not None and low >= target - 1e-8:
-        return 0.0
-    left, right = 0.0, 100.0
-    for _ in range(42):
-        mid = (left + right) / 2
-        if project(course, mid, strict=strict, overrides=overrides).percent >= target:
-            right = mid
+    return Calculator(course, strict=strict, overrides=overrides).required(target)
+
+
+@dataclass(frozen=True)
+class Contribution:
+    assignment_id: int | str
+    name: str
+    group_id: int | str
+    group_name: str
+    weight: float
+    earned: float
+    remaining: float
+    assumed: bool = False
+
+    @property
+    def lost(self):
+        return self.weight - self.earned - self.remaining
+
+
+class Calculator:
+    """Prepare a scenario once; reuse it for targets, navigation and resizing.
+
+    Target searches need only numbers, not submission parsing or warnings on
+    every iteration. Groups without drop rules reduce to a linear expression.
+    Groups with rules still choose their retained items at every candidate mark.
+    """
+    def __init__(self, course, *, strict=False, overrides=None):
+        self.course, self.strict, self.overrides = course, strict, dict(overrides or {})
+        self.weighted = bool(course.get('apply_assignment_group_weights'))
+        self.groups = []
+        self._projections, self._percentages, self._targets = {}, {}, {}
+        self._linear_score = self._linear_slope = self._linear_points = 0.0
+        self._drop_groups = []
+        for group in course.get('groups', []):
+            weight = float(group.get('group_weight') or 0)
+            if self.weighted and not weight:
+                continue
+            rows = []
+            for a in group.get('assignments', []):
+                if not eligible(a):
+                    continue
+                points = float(a.get('points_possible') or 0)
+                score = self.overrides.get(a['id'], fixed_score(a))
+                if score is None and strict and overdue(a):
+                    score = 0.0
+                rows.append((a, score, points))
+            points = sum(row[2] for row in rows)
+            if not points:
+                continue
+            rules = group.get('rules') or {}
+            prepared = (group, rows, weight, rules, set(rules.get('never_drop', [])))
+            self.groups.append(prepared)
+            if rules.get('drop_lowest') or rules.get('drop_highest'):
+                self._drop_groups.append(prepared)
+            else:
+                factor = weight / points if self.weighted else 1.0
+                self._linear_score += sum(score or 0 for _, score, _ in rows) * factor
+                self._linear_slope += sum(p for _, score, p in rows if score is None) * factor / 100
+                self._linear_points += points
+
+    def project(self, remaining=100.0):
+        if remaining not in self._projections:
+            self._projections[remaining] = project(self.course, remaining, strict=self.strict, overrides=self.overrides)
+        return self._projections[remaining]
+
+    def _percent(self, remaining):
+        if remaining in self._percentages:
+            return self._percentages[remaining]
+        total = self._linear_score + self._linear_slope * remaining
+        denominator = 100.0 if self.weighted else self._linear_points
+        for _, prepared, weight, rules, never in self._drop_groups:
+            rows = [(a['id'], points * remaining / 100 if score is None else score, points)
+                    for a, score, points in prepared]
+            for rule, maximize in (('drop_lowest', True), ('drop_highest', False)):
+                count = int(rules.get(rule) or 0)
+                if count:
+                    rows = _best_subset(rows, count, never, maximize)
+            score, points = sum(r[1] for r in rows), sum(r[2] for r in rows)
+            total += weight * score / points if self.weighted else score
+            if not self.weighted:
+                denominator += points
+        value = total / denominator * 100 if denominator else None
+        self._percentages[remaining] = value
+        return value
+
+    def required(self, target):
+        if target in self._targets:
+            return self._targets[target]
+        high, low = self.project(100).percent, self.project(0).percent
+        if high is None or high + 1e-8 < target:
+            value = None
+        elif low is not None and low >= target - 1e-8:
+            value = 0.0
+        elif not self._drop_groups:
+            value = min(100.0, math.nextafter((target - low) / (high - low) * 100, math.inf))
         else:
-            left = mid
-    return right
+            left, right = 0.0, 100.0
+            for _ in range(42):
+                mid = (left + right) / 2
+                if self._percent(mid) >= target:
+                    right = mid
+                else:
+                    left = mid
+            value = right
+        self._targets[target] = value
+        return value
+
+    def contributions(self):
+        """Course percentage points, using this scenario's ceiling drop choice."""
+        projection = self.project()
+        if projection.percent is None:
+            return []
+        kept_groups = [(g, [(a, score, p) for a, score, p in rows if a['id'] not in projection.dropped], weight)
+                       for g, rows, weight, _, _ in self.groups]
+        total_points = sum(p for _, rows, _ in kept_groups for _, _, p in rows)
+        parts = []
+        for group, rows, weight in kept_groups:
+            denominator = sum(row[2] for row in rows) if self.weighted else total_points
+            factor = (weight if self.weighted else 100) / denominator
+            for a, score, points in rows:
+                parts.append(Contribution(a['id'], a['name'], group.get('_source_group_id', group['id']), group['name'],
+                                          points * factor, (score or 0) * factor,
+                                          points * factor if score is None else 0,
+                                          a['id'] in self.overrides))
+        return parts
 
 
 def official_score(course: dict) -> float | None:
@@ -246,7 +357,8 @@ def apply_weights(course: dict, settings: dict | None) -> dict:
             # Keep non-counting items visible in the assessment table.
             assessable = eligible(a) and (a.get("points_possible") or 0) > 0
             weight = float(values.get(str(a["id"]), 0)) if assessable else 0
-            groups.append({"id": a["id"], "name": g["name"], "group_weight": weight, "assignments": [a], "rules": {}})
+            groups.append({"id": a["id"], "name": g["name"], "_source_group_id": g.get('_source_group_id', g['id']),
+                           "group_weight": weight, "assignments": [a], "rules": {}})
             if assessable and str(a["id"]) not in values:
                 new.append(a["name"])
         warnings.append("Custom assessment weights replace Canvas group weights and drop rules.")

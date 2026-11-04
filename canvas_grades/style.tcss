@@ -17,6 +17,7 @@ DataTable:focus { border: round #f5c2e7; }
 #work-panel { width: 3fr; padding-right: 1; }
 #course-title { height: auto; max-height: 2; color: #f5c2e7; text-style: bold; }
 #summary { height: auto; color: #a6adc8; }
+#contributions { height: auto; max-height: 5; color: #a6adc8; margin-top: 1; }
 #assignments { height: 1fr; min-height: 5; border: round #45475a; }
 #assignment-detail { height: auto; min-height: 2; max-height: 4; color: #a6adc8; padding-top: 1; }
 #target-panel { width: 34; background: #181825; padding: 1 1; border: round #45475a; }

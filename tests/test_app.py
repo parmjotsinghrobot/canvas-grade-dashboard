@@ -24,7 +24,7 @@ class AppTests(unittest.IsolatedAsyncioTestCase):
                 await pilot.press("w")
                 await pilot.pause()
                 self.assertIsInstance(app.screen, WhatIf)
-                app.screen.query_one(Input).value = "85"
+                app.screen.query_one(Input).value = "17"
                 await pilot.click("#apply")
                 await pilot.pause()
                 self.assertTrue(app.overrides[4])

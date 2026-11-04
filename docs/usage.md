@@ -16,7 +16,8 @@ Enter your institution's HTTPS Canvas address (for example, `https://canvas.exam
 
 | Key | Action |
 | --- | --- |
-| Tab / Shift+Tab | Move between panels |
+| Tab / Shift+Tab | Cycle courses → assignments → grade targets; Shift+Tab reverses |
+| Page Up / Page Down | Scroll the targets panel and notes when grade targets are focused |
 | Arrows | Select rows and scroll tables |
 | r | Open Canvas for browser sync, or fetch directly in cookie/token mode |
 | c | Choose courses through browser sync, or the picker in cookie/token mode |
@@ -28,7 +29,7 @@ Enter your institution's HTTPS Canvas address (for example, `https://canvas.exam
 | e | Edit the selected custom assessment's name, group, mark or completion state |
 | d | Disable or enable the selected custom assessment |
 | Delete | Delete the selected custom assessment (Canvas assessments cannot be deleted here) |
-| w | What-if percentage on selected assessment; blank restores Canvas data |
+| w | Enter a what-if mark out of the assessment total; blank restores Canvas data |
 | m | Toggle overdue, unsubmitted online assessments to zero in the scenario |
 | x | Reset all what-if assumptions |
 | t | Replace token |
@@ -38,13 +39,19 @@ Enter your institution's HTTPS Canvas address (for example, `https://canvas.exam
 
 The assignment table keeps four bounded columns together: **Assessment, Status, Mark, Weight**. Long titles are clipped to fit instead of pushing marks or weights off-screen. Select a row for its full name, group, due date and submission details below. Column widths adapt when the terminal is resized. The selected-course heading also shows the nickname and official name.
 
-Statuses are **Graded** (green), **Submitted** and awaiting a grade (yellow), or **Not done** (overdue items in red). Offline assessments without submission evidence are shown as **Offline**, since Canvas cannot establish completion. A recorded zero still counts as graded. Course totals show graded, submitted-but-ungraded and not-done counts separately. Down arrows mark dropped items at the ceiling, a dash marks exclusion and an asterisk marks a local what-if override; the row details explain each one.
+Statuses are **Graded** (green), **Submitted** and awaiting a grade (yellow), or **Not done** (overdue items in red). Offline assessments without submission evidence are shown as **Offline**, since Canvas cannot establish completion. A recorded zero still counts as graded. Course totals show graded, submitted-but-ungraded and not-done counts separately. Down arrows mark dropped items at the scenario ceiling, a dash marks exclusion and an asterisk marks a local what-if override; the row details explain each one.
 
 ## Calculations
 
+The grade bar splits the selected course into coloured assessments, grouping assessments smaller than 4% under their group name. Matching coloured squares appear beside the assessment names; if there are more than eight components, smaller components share an **Other assessments** colour. Solid sections are counted marks (including starred what-ifs), shading is still available, and grey is lost. Selecting an assessment dims the other bar sections, including other small assessments with the same group colour. Hovering a row temporarily previews that assessment without changing selection; moving away restores the selected highlight. Focusing the courses or grade targets restores the full bar. Hover over the bar for component totals. These are percentage points of the full course grade, not percentages of completed work.
+
+The bar and Weight column use the scenario ceiling's retained assessments and denominators. Best-N choices can change with final marks, so **Counted** is not necessarily the zero-on-remaining floor. Unavailable weighted groups show an unknown breakdown, and weights below 100% leave an explicitly unallocated section. Extra credit or weights above 100% can extend the displayed scale.
+
+Press **w** and enter your raw mark, for example **24** on an assessment out of **30**. The table shows **24/30***, the scenario total is starred, and submission status remains the official Canvas status. Blank removes that override. Marks, including zero and local custom-assessment marks, persist per Canvas address and course in private settings; the overdue policy is saved per Canvas address too. **x** clears saved scenarios for the current Canvas address. Demo what-ifs remain temporary.
+
 Press **g** on a course to edit its weightings. **Group weights** keep Canvas's within-group point ratios and best-N rules. **Assessment weights** let you set each assessment's percentage of the final course grade, useful when everything is in a single unweighted Canvas group; this mode replaces group/drop rules. Weights must total 100%, and 0% excludes an item. Custom weights update the ceiling, scenario and targets, are saved per Canvas host and course, and survive refreshes and restarts. Use **Restore Canvas weights** to remove an override. New groups or assessments without saved weights trigger a warning. Demo changes last only for the demo session.
 
-You can also select an assessment and press **a** to jump to its weight in the editor (for example, give Test 2 a 15% share even if Canvas has no weighted group). The Weight column shows saved individual percentages. Before individual overrides are configured, it shows `group` or `points` to describe Canvas's calculation method. All assessment weights must total 100% when saved.
+You can also select an assessment and press **a** to jump to its weight in the editor (for example, give Test 2 a 15% share even if Canvas has no weighted group). The Weight column shows saved individual percentages. For Canvas weights it shows each assessment's effective course share after scenario drop rules; dropped items show 0%. All assessment weights must total 100% when saved.
 
 ### Assessments missing from Canvas
 
@@ -56,7 +63,7 @@ Custom entries are saved per course and Canvas address in the local settings and
 
 - **Canvas current:** the current score supplied by Canvas, usually a graded-work average.
 - **Ceiling:** posted scores fixed (including zeros), plus 100% on unmarked assessments. A resubmission awaiting a new grade is pending even if an earlier score exists.
-- **Scenario:** the same calculation with local what-if percentages and overdue policy. Nothing is written to Canvas. Scenarios last for this session.
+- **Scenario:** the same calculation with local what-if marks and overdue policy. Nothing is written to Canvas. Scenarios are saved locally across sessions.
 - **Progress:** mutually exclusive graded, submitted-but-ungraded and not-done counts for visible assessments. Excused items do not count; offline items without completion evidence are listed separately in the course summary. Manually entered grades do not establish an online submission.
 - **Targets:** uniform percentage needed on remaining unmarked work, recalculating drop rules each time. Required percentages round upward to two decimals. Targets use your scenario; overrides stay fixed.
 - **Zero on remaining:** posted marks fixed and everything unmarked zero. Drop choices may change.
@@ -67,7 +74,7 @@ Weighted courses use group weights and points within each group; unweighted cour
 
 **Ceilings depend on visible Canvas data.** Unpublished exams, withheld marks, external grades, late-penalty caps, course pass requirements and scaling cannot be inferred. Overdue unmarked work is optimistically recoverable by default; use `m` or `w` to model lost marks. Posted zeros stay fixed unless overridden in the scenario. Weighted groups without assessable points and courses with multiple grading periods show unknown ceilings. Weights not totalling 100% produce a provisional figure and warning. `~` means review that course's calculation warnings.
 
-Dates use your system timezone. The latest submission timestamp and attempt appear under the assessment table. Drop labels refer to the 100%-remaining ceiling, not necessarily the final drop choice.
+Dates use your system timezone. The latest submission timestamp and attempt appear under the assessment table. Drop labels refer to the scenario's 100%-remaining ceiling, not necessarily the final drop choice.
 
 ## Data and access
 

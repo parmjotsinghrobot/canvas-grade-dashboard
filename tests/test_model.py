@@ -76,7 +76,7 @@ class Grades(unittest.TestCase):
                     assignment(3, 10, due_at="2020-01-01T00:00:00Z", submission_types=["on_paper"])])
         self.assertEqual(model.project(c).percent, 100)
         self.assertAlmostEqual(model.project(c, strict=True).percent, 200/3)
-        self.assertEqual(model.project(c, strict=True, overrides={1: 80}).percent, 280/3)
+        self.assertEqual(model.project(c, strict=True, overrides={1: 8}).percent, 280/3)
 
     def test_resubmission_and_submission_status(self):
         a = assignment(1, 10, submission={"score": 2, "workflow_state": "submitted", "grade_matches_current_submission": False})
@@ -96,7 +96,7 @@ class Grades(unittest.TestCase):
 
     def test_override_does_not_change_canvas_model(self):
         c = course([assignment(1, 10, 0), assignment(2, 10)])
-        self.assertEqual(model.project(c, overrides={1: 90, 2: 90}).percent, 90)
+        self.assertEqual(model.project(c, overrides={1: 9, 2: 9}).percent, 90)
         self.assertEqual(model.project(c).percent, 50)
 
     def test_extra_credit(self):

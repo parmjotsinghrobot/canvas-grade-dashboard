@@ -4,7 +4,7 @@
 
 A Catppuccin terminal dashboard for Canvas grades and submissions. See your highest attainable grade, marks needed for each grade band, and which assessments are graded, submitted or still to do.
 
-Supports course nicknames, custom group/assessment weights, local assessments, best-N drop rules, what-if marks and offline snapshots. Changes stay local; Canvas access uses GET requests only.
+Supports course nicknames, custom group/assessment weights, local assessments, best-N drop rules, saved what-if marks, a colour-coded grade contribution bar and offline snapshots. Changes stay local; Canvas access uses GET requests only.
 
 ![Canvas Grades demo showing course grades, assessment statuses and grade targets using synthetic data](demo.png)
 
